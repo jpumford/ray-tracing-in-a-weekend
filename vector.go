@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 type vec3 struct {
 	x float64
@@ -37,13 +40,44 @@ func (x *vec3) sub(y *vec3) *vec3 {
 }
 
 func (x *vec3) norm() float64 {
-	sum := x.x * x.x + x.y * x.y + x.z * x.z
-	return math.Sqrt(sum)
+	return math.Sqrt(x.normSquared())
 }
 
 func (x *vec3) unit() *vec3 {
 	reciprocalNorm := 1 / x.norm()
 	return x.mult(reciprocalNorm)
+}
+
+func (x *vec3) normSquared() float64 {
+	return x.x * x.x + x.y * x.y + x.z * x.z
+}
+
+func (x *vec3) div(y float64) *vec3 {
+	return &vec3{
+		x.x / y,
+		x.y / y,
+		x.z / y,
+	}
+}
+
+func randomVec(r *rand.Rand) *vec3 {
+	return &vec3{
+		r.Float64(),
+		r.Float64(),
+		r.Float64(),
+	}
+}
+
+func randomInUnitSphere(r *rand.Rand) *vec3 {
+	for {
+		p := randomVec(r)
+		// draw p in unit box
+		p = p.mult(2).sub(&vec3{1, 1, 1})
+
+		if p.normSquared() < 1 {
+			return p
+		}
+	}
 }
 
 type ray struct {
