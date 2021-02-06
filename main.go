@@ -10,9 +10,12 @@ import (
 var widthUnits = 4.0
 var heightUnits = 2.0
 
+// for shadow acne
+var epsilon = 0.001
+
 func main() {
-	nx := 200
-	ny := 100
+	nx := 800
+	ny := 400
 	numSamples := 100
 	randSource := rand.NewSource(time.Now().UnixNano())
 	randNum := rand.New(randSource)
@@ -44,7 +47,11 @@ func main() {
 				color = color.add(getColor(r, world, randNum))
 			}
 
+			// average out samples
 			color = color.div(float64(numSamples))
+
+			// correct for gamma 2
+			color = &vec3{math.Sqrt(color.x), math.Sqrt(color.y), math.Sqrt(color.z)}
 
 			ir := int32(255.99 * color.x)
 			ig := int32(255.99 * color.y)
@@ -55,8 +62,7 @@ func main() {
 }
 
 func getColor(r *ray, world hitable, randGen *rand.Rand) *vec3 {
-	if wasHit, hitRecord := world.hit(r, 0, math.MaxFloat64); wasHit {
-		//return (&vec3{hitRecord.normal.x + 1, hitRecord.normal.y + 1, hitRecord.normal.z + 1}).mult(0.5)
+	if wasHit, hitRecord := world.hit(r, epsilon, math.MaxFloat64); wasHit {
 		newRayStart := hitRecord.p
 		centerOfUnitSphereTangentToSurface := hitRecord.p.add(hitRecord.normal)
 		newRayDirection := centerOfUnitSphereTangentToSurface.add(randomInUnitSphere(randGen))
