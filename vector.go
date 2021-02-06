@@ -50,3 +50,7 @@ type ray struct {
 	origin vec3
 	direction vec3
 }
+
+func (r *ray) at(t float64) *vec3 {
+	return r.origin.add(r.direction.mult(t))
+}
