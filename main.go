@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -20,9 +23,8 @@ func main() {
 	randSource := rand.NewSource(time.Now().UnixNano())
 	randNum := rand.New(randSource)
 
-	fmt.Println("P3")
-	fmt.Printf("%d %d\n", nx, ny)
-	fmt.Println("255")
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("P3\n%d %d\n255\n", nx, ny))
 
 	mat1 := &lambertian{&vec3{0.8, 0.3, 0.3}}
 	mat2 := &lambertian{&vec3{0.8, 0.8, 0}}
@@ -30,15 +32,15 @@ func main() {
 	mat4 := &metal{&vec3{0.8, 0.8, 0.8}}
 	sphere1 := &sphere{&vec3{0, 0, -1}, 0.5, mat1}
 	sphere2 := &sphere{&vec3{0, -100.5, -1}, 100, mat2}
-	sphere3 := &sphere{&vec3{1, 0, -1}, 0.5, mat3}
-	sphere4 := &sphere{&vec3{-1, 0, -1}, 0.5, mat4}
+	sphere3 := &sphere{&vec3{1.25, 0, -1.5}, 0.5, mat3}
+	sphere4 := &sphere{&vec3{-1.25, 0, -1.5}, 0.5, mat4}
 	world := &hitableList{[]hitable{sphere1, sphere2, sphere3, sphere4}}
 
 	cam := &camera{
 		&vec3{0, 0, 0},
 		&vec3{0, heightUnits, 0},
 		&vec3{widthUnits, 0, 0},
-		&vec3{-widthUnits / 2.0, -heightUnits / 2.0, -1.0},
+		&vec3{-widthUnits / 2.0, -heightUnits / 2.0, -1},
 	}
 
 	for j := ny - 1; j >= 0; j-- {
@@ -59,11 +61,21 @@ func main() {
 			// correct for gamma 2
 			color = &vec3{math.Sqrt(color.x), math.Sqrt(color.y), math.Sqrt(color.z)}
 
-			ir := int32(255.99 * color.x)
-			ig := int32(255.99 * color.y)
-			ib := int32(255.99 * color.z)
-			fmt.Printf("%d %d %d\n", ir, ig, ib)
+			ir := int(255.99 * color.x)
+			ig := int(255.99 * color.y)
+			ib := int(255.99 * color.z)
+			sb.WriteString(fmt.Sprintf("%d %d %d\n", ir, ig, ib))
 		}
+	}
+
+	f, err := os.Create("output.ppm")
+	if err != nil {
+		log.Fatalf("Unable to write to output: %v\n", err)
+	}
+	defer f.Close()
+	_, err = f.WriteString(sb.String())
+	if err != nil {
+		log.Fatalf("Unable to write PPM: %v\n", err)
 	}
 }
 
