@@ -60,6 +60,20 @@ func (x *vec3) div(y float64) *vec3 {
 	}
 }
 
+func (x *vec3) componentMult(y *vec3) *vec3 {
+	return &vec3{
+		x.x * y.x,
+		x.y * y.y,
+		x.z * y.z,
+	}
+}
+
+func (x *vec3) reflect(normal *vec3) *vec3 {
+	magnitudeOfVecInNormalDirection := x.dot(normal)
+	b := normal.mult(magnitudeOfVecInNormalDirection)
+	return x.sub(b.mult(2))
+}
+
 func randomVec(r *rand.Rand) *vec3 {
 	return &vec3{
 		r.Float64(),

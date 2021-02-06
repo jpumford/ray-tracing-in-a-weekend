@@ -6,6 +6,7 @@ type hitRecord struct {
 	t float64
 	p *vec3
 	normal *vec3
+	mat material
 }
 
 type hitable interface {
@@ -15,6 +16,7 @@ type hitable interface {
 type sphere struct {
 	center *vec3
 	radius float64
+	mat material
 }
 
 func (s *sphere) hit(r *ray, tmin float64, tmax float64) (bool, *hitRecord) {
@@ -31,6 +33,7 @@ func (s *sphere) hit(r *ray, tmin float64, tmax float64) (bool, *hitRecord) {
 				possibleT,
 				hitPoint,
 				hitPoint.sub(s.center).unit(),
+				s.mat,
 			}
 			return true, record
 		}
@@ -41,6 +44,7 @@ func (s *sphere) hit(r *ray, tmin float64, tmax float64) (bool, *hitRecord) {
 				possibleT,
 				hitPoint,
 				hitPoint.sub(s.center).unit(),
+				s.mat,
 			}
 			return true, record
 		}
